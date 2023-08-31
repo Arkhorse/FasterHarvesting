@@ -1,0 +1,7 @@
+limb names:
+    INTERACTIVE_LimbA_Prefab
+    INTERACTIVE_LimbB_Prefab
+    INTERACTIVE_LimbA_Big_Prefab
+    INTERACTIVE_LimbB_Big_Prefab
+Branch names:
+    INTERACTIVE_BranchA_Prefab
