@@ -7,33 +7,38 @@
         {
             if (!enable) return;
 
-            Logger.Log("Panel_BreakDown");
+            //Logger.Log("Panel_BreakDown");
 
-            if (__instance.m_BreakDown.gameObject.name == "INTERACTIVE_LimbA_Prefab")
+            string NormalizedName = Utilities.NormalizeName(__instance.m_BreakDown.gameObject.name);
+
+            if (Main.DefaultObjects.Exists(d => d.ObjectName == NormalizedName))
             {
-                Logger.Log($"Limb found");
-                __instance.m_BreakDown.m_TimeCostHours = (float)Settings.Instance.limbATime;
+                __instance.m_BreakDown.m_TimeCostHours = (float)Main.DefaultObjects.Find(d => d.ObjectName == NormalizedName)!.ObjectBreakDownTime;
             }
-            else if (__instance.m_BreakDown.gameObject.name == "INTERACTIVE_LimbB_Prefab")
+
+            #region CustomList
+
+            if (Settings.Instance.AllowCustomList && Main.entries.Count > 0)
             {
-                Logger.Log($"Limb found");
-                __instance.m_BreakDown.m_TimeCostHours = (float)Settings.Instance.limbBTime;
+                // NormalizeName is needed here as (Clone) is extremely common
+                if (Main.entries.Exists(f => f.ObjectName == NormalizedName))
+                {
+                    __instance.m_BreakDown.m_TimeCostHours = (float)Main.entries.Find(f => f.ObjectName == NormalizedName)!.ObjectBreakDownTime;
+                }
+                else if (Main.LogInteractiveObjectDetails)
+                {
+                    Logger.LogSeperator();
+                    Logger.Log("[INFO] Currently interactive object is not contained in any of the custom configs.");
+                    Logger.Log($"Interactive object info:\nName: {NormalizedName}\n Breakdown Time: {__instance.m_BreakDown.m_TimeCostHours}");
+                    Logger.LogSeperator();
+                }
             }
-            else if (__instance.m_BreakDown.gameObject.name == "INTERACTIVE_LimbA_Big_Prefab")
+            else if (Settings.Instance.AllowCustomList && Main.entries.Count == 0)
             {
-                Logger.Log($"Limb found");
-                __instance.m_BreakDown.m_TimeCostHours = (float)Settings.Instance.limbABigTime;
+                Logger.LogWarning("entries.Count is 0 while the setting is enabled");
             }
-            else if (__instance.m_BreakDown.gameObject.name == "INTERACTIVE_LimbB_Big_Prefab")
-            {
-                Logger.Log($"Limb found");
-                __instance.m_BreakDown.m_TimeCostHours = (float)Settings.Instance.limbBBigTime;
-            }
-            else if (__instance.m_BreakDown.gameObject.name == "INTERACTIVE_BranchA_Prefab")
-            {
-                Logger.Log($"Limb found");
-                __instance.m_BreakDown.m_TimeCostHours = (float)Settings.Instance.branchATime;
-            }
+
+            #endregion
         }
     }
 }
