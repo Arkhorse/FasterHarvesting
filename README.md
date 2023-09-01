@@ -15,6 +15,5 @@ The prefab name without the extension.
 ## `ObjectBreakDownTime` 
 The amount of time to break down this item. The game uses a `float` to represent amount of time in hours. So `1.0f` would be 1 hour. The mod uses a `double` for other reasons.<br/>
 
-[!IMPORTANT]
 ### Limits:
 * Must be between `0.01d` and `12.00d`
