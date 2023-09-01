@@ -21,5 +21,10 @@ namespace FasterHarvesting.CustomList
             this.ObjectName = ObjectName;
             this.ObjectBreakDownTime = ObjectBreakDownTime;
         }
+
+        public override string ToString()
+        {
+            return $"ObjectName {this.ObjectName}, ObjectBreakDownTime: {this.ObjectBreakDownTime}";
+        }
     }
 }
