@@ -36,6 +36,9 @@ namespace FasterHarvesting
         [Description("This will log the currently active object data. Only enable this if you need this info")]
         public bool InteractiveLog = false;
 
+        [Name("Log CustomListHandler debug")]
+        public bool CustomListHandlerDebug = false;
+
         protected override void OnConfirm()
         {
             base.OnConfirm();
