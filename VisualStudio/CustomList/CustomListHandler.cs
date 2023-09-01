@@ -5,7 +5,8 @@ namespace FasterHarvesting.CustomList
 {
     internal class CustomListHandler
     {
-        private static ICustomListEntry demo = new("INTERACTIVE_BranchA_Prefab",1.5d);
+        private static ICustomListEntry demo { get; } = new("INTERACTIVE_BranchA_Prefab",1.5d);
+        private static bool LogDebug { get; } = Settings.Instance.CustomListHandlerDebug;
 
         public static void Initilize()
         {
@@ -48,14 +49,8 @@ namespace FasterHarvesting.CustomList
 
                 if (VerifyEntry(entry))
                 {
-                    Logger.Log($"Entry added with path {configFileName}");
+                    if (LogDebug) Logger.Log($"Entry added with path {configFileName}");
                     Main.entries.Add(entry!);
-                }
-                else
-                {
-                    Logger.LogWarning(
-                        $"Config returned false: {configFileName}\nIs Null: {entry == null}\n If entry is not null, then it already exists in the Default Objects list"
-                        );
                 }
 
                 CustomFileStream.Dispose();
@@ -76,17 +71,30 @@ namespace FasterHarvesting.CustomList
         {
             if (entry != null)
             {
-                if (Main.DefaultObjects.Exists(d => d.ObjectName == entry.ObjectName))
+                if (Main.DefaultObjects.Exists(d => d.ObjectName == entry.ObjectName) || Main.entries.Exists(d => d.ObjectName == entry.ObjectName))
                 {
+                    Logger.LogWarning($"Defined entry already exists, {entry.ObjectName}");
                     return false;
+                }
+
+                GameObject entryObject = GameObject.Find(entry.ObjectName);
+                if (entryObject)
+                {
+                    if (LogDebug) Logger.Log($"entry GameObject has been found, {entry.ObjectName}");
+                    BreakDown entryBreakDown = entryObject.GetComponent<BreakDown>();
+                    if (entryBreakDown)
+                    {
+                        if (LogDebug) Logger.Log("entry has a BreakDown component");
+                        return true;
+                    }
                 }
                 else
                 {
-                    return true;
+                    Logger.LogWarning($"entry GameObject has not been found, {entry.ObjectName}");
                 }
             }
 
-            return entry != null;
+            return false;
         }
 
         public static void SaveDemo()
