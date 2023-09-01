@@ -6,23 +6,23 @@ namespace FasterHarvesting
 
         [Name("GAMEPLAY_BranchBigSoft", Localize = true)]
         [Slider(0.01f, 12.00f, NumberFormat = "{0:F2}")]
-        public double limbATime = 1.50f;
+        public float limbATime = 1.50f;
 
         [Name("GAMEPLAY_BranchBigHard", Localize = true)]
         [Slider(0.01f, 12.00f, NumberFormat = "{0:F2}")]
-        public double limbBTime = 1.50f;
+        public float limbBTime = 1.50f;
 
         [Name("GAMEPLAY_BranchBigSoft", Localize = true)]
         [Slider(0.01f, 12.00f, NumberFormat = "{0:F2}")]
-        public double limbABigTime = 1.50f;
+        public float limbABigTime = 1.50f;
 
         [Name("GAMEPLAY_BranchBigHard", Localize = true)]
         [Slider(0.01f, 12.00f, NumberFormat = "{0:F2}")]
-        public double limbBBigTime = 1.50f;
+        public float limbBBigTime = 1.50f;
 
         [Name("GAMEPLAY_branch", Localize = true)]
         [Slider(0.01f, 12.00f, NumberFormat = "{0:F2}")]
-        public double branchATime = 0.170f;
+        public float branchATime = 0.170f;
 
         [Section("Custom List")]
 

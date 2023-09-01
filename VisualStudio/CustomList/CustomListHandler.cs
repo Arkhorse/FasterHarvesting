@@ -1,11 +1,10 @@
-﻿using System.Security.AccessControl;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace FasterHarvesting.CustomList
 {
     internal class CustomListHandler
     {
-        private static ICustomListEntry demo { get; } = new("INTERACTIVE_BranchA_Prefab",1.5d);
+        private static ICustomListEntry demo { get; } = new("INTERACTIVE_BranchA_Prefab",1.5f);
         private static bool LogDebug { get; } = Settings.Instance.CustomListHandlerDebug;
 
         public static void Initilize()
@@ -75,6 +74,12 @@ namespace FasterHarvesting.CustomList
                 {
                     Logger.LogWarning($"Defined entry already exists, {entry.ObjectName}");
                     return false;
+                }
+
+                if (entry.ObjectBreakDownTime > 12.00f)
+                {
+                    entry.ObjectBreakDownTime = 12.00f;
+                    Logger.LogWarning($"Entry: {entry.ToString()} has a BreakDown Time greater than 12.00d");
                 }
 
                 GameObject entryObject = GameObject.Find(entry.ObjectName);

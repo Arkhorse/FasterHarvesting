@@ -6,15 +6,15 @@ Your custom list must be a json file, placed in `\{GamePath}\Mods\FasterHarvesti
 ```json
 {
 	"ObjectName": "INTERACTIVE_LimbA_Prefab",
-	"ObjectBreakDownTime": 1.5d
+	"ObjectBreakDownTime": 1.5f
 }
 ```
 
 ## `ObjectName` 
 The prefab name without the extension.
 ## `ObjectBreakDownTime` 
-The amount of time to break down this item. The game uses a `float` to represent amount of time in hours. So `1.0f` would be 1 hour. The mod uses a `double` for other reasons.<br/>
+The amount of time to break down this item. The game uses a `float` to represent amount of time in hours. So `1.0f` would be 1 hour.<br/>
 
 [!IMPORTANT]
 ### Limits:
-* Must be between `0.01d` and `12.00d`
+* Must be between `0.01f` and `12.00f`
