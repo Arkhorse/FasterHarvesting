@@ -4,12 +4,25 @@ namespace FasterHarvesting.CustomList
 {
     internal class CustomListHandler
     {
-        private static ICustomListEntry demo { get; } = new("INTERACTIVE_BranchA_Prefab",1.5f);
+        private static ICustomListEntry demo { get; } = new ICustomListEntry("INTERACTIVE_BranchA_Prefab", 1.5f);
         private static bool LogDebug { get; } = Settings.Instance.CustomListHandlerDebug;
 
         public static void Initilize()
         {
             if (!Settings.Instance.AllowCustomList) return;
+
+            try
+            {
+                if (!Directory.Exists(Main.CustomListFolder))
+                {
+                    Directory.CreateDirectory(Main.CustomListFolder);
+                }
+            }
+            catch
+            {
+                Logger.LogError("Attempting to create custom list directory failed");
+                throw;
+            }
             PopulateConfigFiles();
         }
 
@@ -86,7 +99,7 @@ namespace FasterHarvesting.CustomList
                 if (entryObject)
                 {
                     if (LogDebug) Logger.Log($"entry GameObject has been found, {entry.ObjectName}");
-                    BreakDown entryBreakDown = entryObject.GetComponent<BreakDown>();
+                    Il2Cpp.BreakDown entryBreakDown = entryObject.GetComponent<Il2Cpp.BreakDown>();
                     if (entryBreakDown)
                     {
                         if (LogDebug) Logger.Log("entry has a BreakDown component");
@@ -106,19 +119,37 @@ namespace FasterHarvesting.CustomList
         {
             try
             {
-                using FileStream demostream = File.OpenWrite(Main.DemoFile);
-
-                JsonSerializer.Serialize<ICustomListEntry>(demo, new JsonSerializerOptions() { WriteIndented = true, IncludeFields = true });
-                demostream.Dispose();
-            }
-            catch (UnauthorizedAccessException accessdenied)
-            {
-                Logger.LogError($"Access was denied when attempting to save the demo config file");
-                throw accessdenied;
+                if (!File.Exists(Main.DemoFile))
+                {
+                    using FileStream createStream = File.Create(Main.DemoFile);
+                    createStream.Dispose();
+                }
             }
             catch
             {
-                Logger.LogError($"Unknown error prevented the demo file from saving");
+                Logger.LogError("Atempting to creat Demo config file failed");
+                throw;
+            }
+            try
+            {
+                using FileStream demostream = File.OpenWrite(Main.DemoFile);
+
+                JsonSerializer.Serialize<ICustomListEntry>(demostream, demo, new JsonSerializerOptions() { WriteIndented = true, IncludeFields = true });
+                demostream.Dispose();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Logger.LogError("Access was denied when attempting to save the demo config file");
+                throw;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                Logger.LogError("Directory was not found. This catch should never be called, if it is, there is another problem occuring");
+                throw;
+            }
+            catch
+            {
+                Logger.LogError("Unknown error prevented the demo file from saving");
                 throw;
             }
         }
