@@ -8,37 +8,18 @@
             if (!enable) return;
 
             //Logger.Log("Panel_BreakDown");
-
             string NormalizedName = Utilities.NormalizeName(__instance.m_BreakDown.gameObject.name);
 
-            if (Main.DefaultObjects.Exists(d => d.ObjectName == NormalizedName))
-            {
-                __instance.m_BreakDown.m_TimeCostHours = (float)Main.DefaultObjects.Find(d => d.ObjectName == NormalizedName)!.ObjectBreakDownTime;
-            }
+            BreakDown.Branches.HarvestAlter(__instance, NormalizedName);
+            BreakDown.CustomList.HarvestAlter(__instance, NormalizedName);
 
-            #region CustomList
-
-            if (Settings.Instance.AllowCustomList && Main.entries.Count > 0)
+            if (Main.LogInteractiveObjectDetails)
             {
-                // NormalizeName is needed here as (Clone) is extremely common
-                if (Main.entries.Exists(f => f.ObjectName == NormalizedName))
-                {
-                    __instance.m_BreakDown.m_TimeCostHours = (float)Main.entries.Find(f => f.ObjectName == NormalizedName)!.ObjectBreakDownTime;
-                }
-                else if (Main.LogInteractiveObjectDetails)
-                {
-                    Logger.LogSeperator();
-                    Logger.Log("[INFO] Currently interactive object is not contained in any of the custom configs.");
-                    Logger.Log($"Interactive object info:\nName: {NormalizedName}\n Breakdown Time: {__instance.m_BreakDown.m_TimeCostHours}");
-                    Logger.LogSeperator();
-                }
+                Logger.LogSeperator();
+                Logger.Log("[INFO] Currently interactive object is not contained in any of the custom configs.");
+                Logger.Log($"Interactive object info:\nName: {NormalizedName}\n Breakdown Time: {__instance.m_BreakDown.m_TimeCostHours}");
+                Logger.LogSeperator();
             }
-            else if (Settings.Instance.AllowCustomList && Main.entries.Count == 0)
-            {
-                Logger.LogWarning("entries.Count is 0 while the setting is enabled");
-            }
-
-            #endregion
         }
     }
 }
