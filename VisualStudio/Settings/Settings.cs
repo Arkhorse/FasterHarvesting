@@ -4,6 +4,13 @@ namespace FasterHarvesting
     {
         internal static Settings Instance { get; } = new();
 
+        [Section("SETTING_SECTION_GENERAL", Localize = true)]
+
+        [Name("SETTING_GENERAL_REMEMBER_BREAKDOWN", Localize = true)]
+        public bool RememberBreakDown = false;
+
+        [Section("SETTING_SECTION_LIMB", Localize = true)]
+
         [Name("GAMEPLAY_BranchBigSoft", Localize = true)]
         [Slider(0.01f, 12.00f, NumberFormat = "{0:F2}")]
         public float limbATime = 1.50f;
@@ -24,20 +31,23 @@ namespace FasterHarvesting
         [Slider(0.01f, 12.00f, NumberFormat = "{0:F2}")]
         public float branchATime = 0.170f;
 
-        [Section("Custom List")]
+        [Section("SETTING_SECTION_CUSTOM_LIST", Localize = true)]
 
-        [Name("Allow Custom List")]
-        [Description("Please see the mods repo on how to use this function")]
+        [Name("SETTING_CUSTOM_LIST_ENABLE", Localize = true)]
+        [Description("SETTING_CUSTOM_LIST_ENABLE_DESC", Localize = true)]
         public bool AllowCustomList = false;
 
-        [Section("Advanced Options")]
+        [Section("SETTING_SECTION_ADVANCED", Localize = true)]
 
-        [Name("Enable Interactive Object Log")]
-        [Description("This will log the currently active object data. Only enable this if you need this info")]
+        [Name("SETTING_ADVANCED_LOG_INTERACTIVE", Localize = true)]
+        [Description("SETTING_ADVANCED_LOG_INTERACTIVE_DESC", Localize = true)]
         public bool InteractiveLog = false;
 
-        [Name("Log CustomListHandler debug")]
+        [Name("SETTING_ADVANCED_LOG_CUSTOM_LIST", Localize = true)]
         public bool CustomListHandlerDebug = false;
+
+        [Name("SETTING_ADVANCED_LOG_DEFINITION", Localize = true)]
+        public bool LogDefinition = false;
 
         protected override void OnConfirm()
         {
