@@ -11,6 +11,6 @@ namespace FasterHarvesting
     /// </summary>
     internal class MainConfig
     {
-        public float BreakDownCalories { get; set; }
+        
     }
 }

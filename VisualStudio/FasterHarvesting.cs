@@ -25,6 +25,7 @@ namespace FasterHarvesting
         internal static JsonSerializerOptions options { get; } = new JsonSerializerOptions() { IncludeFields = true, WriteIndented = true };
         internal static MainConfig Config { get; } = new MainConfig();
         #endregion
+        public static float BreakDownCalories { get; set; }
 
         public override void OnInitializeMelon()
         {
