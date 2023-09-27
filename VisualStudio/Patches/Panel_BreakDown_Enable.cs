@@ -12,7 +12,7 @@ namespace FasterHarvesting
         {
             if (!enable) return;
 
-            Il2Cpp.BreakDown breakDown = __instance.m_BreakDown;
+            BreakDown breakDown = __instance.m_BreakDown;
             string name = CommonUtils.NormalizeName(breakDown.gameObject.name);
 
             if (Main.ObjectExists(name))
