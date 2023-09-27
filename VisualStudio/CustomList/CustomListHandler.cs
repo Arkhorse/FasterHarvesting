@@ -1,157 +1,188 @@
-﻿using System.Text.Json;
+﻿using FasterHarvesting.Utilities;
 
 namespace FasterHarvesting.CustomList
 {
-    internal class CustomListHandler
-    {
-        private static ICustomListEntry demo { get; } = new ICustomListEntry("INTERACTIVE_BranchA_Prefab", 1.5f);
-        private static bool LogDebug { get; } = Settings.Instance.CustomListHandlerDebug;
+	internal class CustomListHandler
+	{
+		private static List<string> demoTools = new()
+		{
+			"GEAR_Hatchet",
+			"GEAR_HatchetImprovised"
+		};
 
-        public static void Initilize()
-        {
-            if (!Settings.Instance.AllowCustomList) return;
+		private static CustomDuration MinimumDuration = new(0, 0, 0, 3, true);
 
-            try
-            {
-                if (!Directory.Exists(Main.CustomListFolder))
-                {
-                    Directory.CreateDirectory(Main.CustomListFolder);
-                }
-            }
-            catch
-            {
-                Logger.LogError("Attempting to create custom list directory failed");
-                throw;
-            }
-            PopulateConfigFiles();
-        }
+		private static ICustomListEntry demo { get; } = new ICustomListEntry(
+			"INTERACTIVE_BranchA_Prefab",
+			0.01f,
+			1.5f,
+			UsableToolsOriginal: demoTools,
+			m_CustomDuration: MinimumDuration
+		);
 
-        public static void PopulateConfigFiles()
-        {
-            try
-            {
-                string[] files = Directory.GetFiles(Main.CustomListFolder, "*.json");
-                Array.Sort(files, StringComparer.InvariantCultureIgnoreCase);
+		public static void Initilize()
+		{
+			if (Settings.Instance.InteractiveLog) Logging.Log("Config Initilize");
+			//if (!Settings.Instance.AllowCustomList) return;
 
-                foreach (string file in files)
-                {
-                    LoadConfigFile(file);
-                }
+			try
+			{
+				if (!Directory.Exists(Main.CustomListFolder))
+				{
+					Directory.CreateDirectory(Main.CustomListFolder);
+				}
+			}
+			catch
+			{
+				Logging.LogError("Attempting to create custom list directory failed");
+				throw;
+			}
+			PopulateConfigFiles();
+		}
 
-            }
-            catch (FileNotFoundException fnf)
-            {
-                Logger.LogError($"Custom list file not found. Reason: {fnf.Message} {fnf.StackTrace}");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Unknown error prevented the Custom List from being populated. Exception: {e.Message} {e.StackTrace}");
-            }
-        }
+		public static void ReInitilize()
+		{
+			if (Settings.Instance.InteractiveLog) Logging.Log("Config ReInitilize");
+			//if (!Settings.Instance.AllowCustomList) return;
 
-        public static void LoadConfigFile(string configFileName)
-        {
-            string ConfigFilePath = Path.Combine(Main.CustomListFolder, configFileName);
+			try
+			{
+				if (!Directory.Exists(Main.CustomListFolder))
+				{
+					Directory.CreateDirectory(Main.CustomListFolder);
+				}
+			}
+			catch
+			{
+				Logging.LogError("Attempting to create custom list directory failed");
+				throw;
+			}
 
-            try
-            {
-                using FileStream CustomFileStream = File.OpenRead(ConfigFilePath);
+			Main.ObjectsToAlter.Clear();
 
-                ICustomListEntry? entry = JsonSerializer.Deserialize<ICustomListEntry>(CustomFileStream);
+			PopulateConfigFiles();
+		}
 
-                if (VerifyEntry(entry))
-                {
-                    if (LogDebug) Logger.Log($"Entry added with path {configFileName}");
-                    Main.entries.Add(entry!);
-                }
+		public static void PopulateConfigFiles()
+		{
+			if (Settings.Instance.InteractiveLog) Logging.Log("Config Populate");
+			try
+			{
+				string[] files = Directory.GetFiles(Main.CustomListFolder, "*.json");
+				Array.Sort(files, StringComparer.InvariantCultureIgnoreCase);
 
-                CustomFileStream.Dispose();
-            }
-            catch (UnauthorizedAccessException accessdenied)
-            {
-                Logger.LogError($"Access was denied when attempting to load the config file named {configFileName}");
-                throw accessdenied;
-            }
-            catch
-            {
-                Logger.LogError($"Unknown error prevented the config file named {configFileName} from loading");
-                throw;
-            }
-        }
+				if (Settings.Instance.InteractiveLog) Logging.LogSeperator();
+				foreach (string file in files)
+				{
+					JsonFile.Load(file);
+				}
+				
 
-        public static bool VerifyEntry(ICustomListEntry? entry)
-        {
-            if (entry != null)
-            {
-                if (Main.DefaultObjects.Exists(d => d.ObjectName == entry.ObjectName) || Main.entries.Exists(d => d.ObjectName == entry.ObjectName))
-                {
-                    Logger.LogWarning($"Defined entry already exists, {entry.ObjectName}");
-                    return false;
-                }
+				foreach (ICustomListEntry entry in Main.ObjectsToAlter)
+				{
+					if (VerifyEntry(entry))
+					{
+						if (Settings.Instance.InteractiveLog) Logging.Log($"Entry Added: {entry.ObjectName}");
+						continue;
+					}
+					else
+					{
+						Main.ObjectsToAlter.Remove(entry);
+					}
+				}
+				if (!Settings.Instance.InteractiveLog) Logging.Log($"Configs loaded: {Main.ObjectsToAlter.Count}");
+				if (Settings.Instance.InteractiveLog) Logging.LogSeperator();
 
-                if (entry.ObjectBreakDownTime > 12.00f)
-                {
-                    entry.ObjectBreakDownTime = 12.00f;
-                    Logger.LogWarning($"Entry: {entry.ToString()} has a BreakDown Time greater than 12.00d");
-                }
+			}
+			catch (FileNotFoundException fnf)
+			{
+				Logging.LogError($"Custom list file not found. Reason: {fnf.Message} {fnf.StackTrace}");
+			}
+			catch (Exception e)
+			{
+				Logging.LogError($"Unknown error prevented the Custom List from being populated. Exception: {e.Message} {e.StackTrace}");
+			}
+		}
 
-                GameObject entryObject = GameObject.Find(entry.ObjectName);
-                if (entryObject)
-                {
-                    if (LogDebug) Logger.Log($"entry GameObject has been found, {entry.ObjectName}");
-                    Il2Cpp.BreakDown entryBreakDown = entryObject.GetComponent<Il2Cpp.BreakDown>();
-                    if (entryBreakDown)
-                    {
-                        if (LogDebug) Logger.Log("entry has a BreakDown component");
-                        return true;
-                    }
-                }
-                else
-                {
-                    Logger.LogWarning($"entry GameObject has not been found, {entry.ObjectName}");
-                }
-            }
+		public static bool VerifyEntry(ICustomListEntry? entry)
+		{
+			if (entry != null)
+			{
+				if (Settings.Instance.ADVANCED_listadd)
+				{
+					Logging.Log($"\tObjectName:                  {entry.ObjectName}");
+					Logging.Log($"\tObjectBreakDownTime:         {entry.ObjectBreakDownTime}");
+					Logging.Log($"\tObjectBreakDownTimeOriginal: {entry.ObjectBreakDownTimeOriginal}");
+				}
 
-            return false;
-        }
+				if (entry.ObjectBreakDownTime > 12.00f)
+				{
+					entry.ObjectBreakDownTime = 12.00f;
+					Logging.LogWarning($"Entry: {entry.ObjectName} has a BreakDown Time greater than 12.00f");
+				}
+				if (entry.ObjectBreakDownTime < 0.01f)
+				{
+					entry.ObjectBreakDownTime = 0.02f; // 0.02f works for all objects
+					Logging.LogWarning($"Entry: {entry.ObjectName} has a BreakDown Time less than 0.01f");
+				}
 
-        public static void SaveDemo()
-        {
-            try
-            {
-                if (!File.Exists(Main.DemoFile))
-                {
-                    using FileStream createStream = File.Create(Main.DemoFile);
-                    createStream.Dispose();
-                }
-            }
-            catch
-            {
-                Logger.LogError("Atempting to creat Demo config file failed");
-                throw;
-            }
-            try
-            {
-                using FileStream demostream = File.OpenWrite(Main.DemoFile);
+				//GameObject entryObjectRaw = GameObject.Find(entry.ObjectName);
 
-                JsonSerializer.Serialize<ICustomListEntry>(demostream, demo, new JsonSerializerOptions() { WriteIndented = true, IncludeFields = true });
-                demostream.Dispose();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Logger.LogError("Access was denied when attempting to save the demo config file");
-                throw;
-            }
-            catch (DirectoryNotFoundException)
-            {
-                Logger.LogError("Directory was not found. This catch should never be called, if it is, there is another problem occuring");
-                throw;
-            }
-            catch
-            {
-                Logger.LogError("Unknown error prevented the demo file from saving");
-                throw;
-            }
-        }
-    }
+				//if (entryObjectRaw)
+				//{
+				//    if (Settings.Instance.InteractiveLog) Logging.Log($"entry GameObject has been found, {entry.ObjectName}");
+				//    Il2Cpp.BreakDown entryBreakDown = entryObjectRaw.GetComponent<Il2Cpp.BreakDown>();
+				//    if (entryBreakDown)
+				//    {
+				//        if (Settings.Instance.InteractiveLog) Logging.Log("entry has a BreakDown component");
+				//        return true;
+				//    }
+				//}
+				//// These objects normally cant be found on game load, need to move this to an OnSceneWasInit method or check for scene name somewhere before this
+				//else Logging.LogWarning($"entry GameObject has not been found, {entry.ObjectName}");
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public static void SaveDemo()
+		{
+			try
+			{
+				if (!File.Exists(Main.DemoFile)) 
+				{
+					JsonFile.Save(demo);
+				}
+			}
+			catch (UnauthorizedAccessException)
+			{
+				Logging.LogError("Access was denied when attempting to save the demo config file");
+				throw;
+			}
+			catch (DirectoryNotFoundException)
+			{
+				Logging.LogError("Directory was not found. This catch should never be called, if it is, there is another problem occuring");
+				throw;
+			}
+			catch
+			{
+				Logging.LogError("Unknown error prevented the demo file from saving");
+				throw;
+			}
+		}
+
+		public static void CreateNewConfig(string ObjectName, float BreakDownTime, float BreakDownTimeOriginal)
+		{
+			ICustomListEntry entry = new(ObjectName, BreakDownTime, BreakDownTimeOriginal);
+			JsonFile.Save(entry);
+		}
+
+		public static void CreateNewConfig(string ObjectName, float BreakDownTime, float BreakDownTimeOriginal, List<string> UsableToolsOriginal)
+		{
+			ICustomListEntry entry = new(ObjectName, BreakDownTime, BreakDownTimeOriginal, UsableToolsOriginal:UsableToolsOriginal);
+			JsonFile.Save(entry);
+		}
+	}
 }
